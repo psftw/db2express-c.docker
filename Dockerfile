@@ -22,41 +22,54 @@ FROM centos:7
 
 MAINTAINER Leo Wu <leow@ca.ibm.com>
 
-User root
+RUN groupadd db2iadm1 && useradd -G db2iadm1 db2inst1
 
-RUN yum -y install wget
-
-RUN wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-RUN rpm -ivh epel-release-7-5.noarch.rpm
-
-RUN yum install -y vi tar initscripts \
-    system-config-language \
-    sudo \
-    passwd \
-    pam \
-    pam.i686 \
-    ncurses-libs.i686 \
-    file \
-    rsyslog \
-    e2fsprogs \
+RUN yum install -y \
     libaio \
-    libaio.i686 \
-    compat-libstdc++-33 \
-    libstdc++-devel \
-    libstdc++-devel.i686 \
-    dapl-devel \
-    libibverbs-devel \
-    sg3_utils \
-    numactl \
-    numactl.i686 \
-    gcc-c++ \
-    kernel-devel \
-    openssh-server
+    libstdc++.i686 \
+    pam.i686 \
+    passwd \
+    && yum clean all
 
-COPY install_db2.sh /tmp/install_db2.sh
-RUN /tmp/install_db2.sh
+# TODO do we actually need any of these?
+#    sudo \
+#    sg3_utils \
+#    dapl \
+#    numactl \
+#    numactl.i686 \
+#    libibverbs-devel \
+#    dapl-devel \
+#    rsyslog \
+#    compat-libstdc++-33 \
+#    libstdc++-devel \
+#    libstdc++-devel.i686 \
+#    libaio.i686 \
+#    ncurses-libs.i686 \
+#    pam \
+#    initscripts \
+#    system-config-language \ -- this one brings in lots of X11 stuff
+#    kernel-devel && \
+#    e2fsprogs \
+#    gcc-c++ \
+
+ENV DB2EXPRESSC_SHA256 a5c9a3231054047f1f63e7144e4da49c4feaca25d8fce4ad97539d72abfc93d0
+ENV DB2EXPRESSC_URL https://s3.amazonaws.com/db2-expc105-64bit-centos/v10.5fp5_linuxx64_expc.tar.gz
+#ENV DB2EXRPESSC_URL http://192.168.1.70/v10.5fp5_linuxx64_expc.tar.gz
+RUN curl -fSLo /tmp/expc.tar.gz $DB2EXPRESSC_URL \
+    && echo "$DB2EXPRESSC_SHA256 /tmp/expc.tar.gz" | sha256sum -c - \
+    && cd /tmp && tar xf expc.tar.gz \
+    && su - db2inst1 -c "/tmp/expc/db2_install -b /home/db2inst1/sqllib" \
+    && su - db2inst1 -c "cat /home/db2inst1/sqllib/db2profile >> /home/db2inst1/.bash_profile" \
+    && sed -ri 's/ENABLE_OS_AUTHENTICATION=NO/ENABLE_OS_AUTHENTICATION=YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && sed -ri 's/RESERVE_REMOTE_CONNECTION=NO/RESERVE_REMOTE_CONNECTION=YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && sed -ri 's/\*SVCENAME=db2c_db2inst1/SVCENAME=db2c_db2inst1/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && sed -ri 's/\*SVCEPORT=48000/SVCEPORT=50000/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && su - db2inst1 -c "db2set DB2COMM=TCPIP && db2stop force" \
+    && cd /home/db2inst1/sqllib/instance && ./db2rfe -f ./db2rfe.cfg \
+    && rm -rf /tmp
 
 COPY docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
-EXPOSE 22 50000
+VOLUME /home/db2inst1
+EXPOSE 50000

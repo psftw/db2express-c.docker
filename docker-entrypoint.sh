@@ -45,6 +45,10 @@ if [ "${LICENSE}" != "accept" ];then
 fi
 
 if [[ $1 = "-d" ]]; then
+  # TODO should likely be using gosu here?
+  # need to make sure there are no other options to avoid the
+  # auto-backgrounding db2start binary and if not, then maybe there are better
+  # options for the "while true" loop?
   su - db2inst1 -c "db2start"
   while true; do sleep 1000; done
 else
