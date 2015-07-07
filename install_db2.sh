@@ -21,15 +21,7 @@
 # limitations under the License.
 
 
-
-###############################################################
-#
-#               Download and install DB2 Express-C
-#
-###############################################################
-
 # Download DB2 Express-C from public bucket on AWS S3
-# Note: you can update this script to copy/download image in your manners
 cd /tmp && wget https://s3.amazonaws.com/db2-expc105-64bit-centos/v10.5fp5_linuxx64_expc.tar.gz
 cd /tmp && tar xvf /tmp/v10.5fp5_linuxx64_expc.tar.gz && chmod +rw /tmp/expc
 

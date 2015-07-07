@@ -1,1 +1,0 @@
-Official IBM DB2 Express-C image for open source community for free.

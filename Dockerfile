@@ -18,29 +18,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Specify base OS with kernel 3.10.0
-# Options:
-#   centos:7
-
-
-FROM    centos:7
+FROM centos:7
 
 MAINTAINER Leo Wu <leow@ca.ibm.com>
 
 User root
 
-###############################################################
-#
-#               System preparation for DB2
-#
-###############################################################
+RUN yum -y install wget
 
-RUN  yum -y install wget
+RUN wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+RUN rpm -ivh epel-release-7-5.noarch.rpm
 
-RUN  wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-RUN  rpm -ivh epel-release-7-5.noarch.rpm
-
-# Required pacakges
 RUN yum install -y vi tar initscripts \
     system-config-language \
     sudo \
@@ -66,7 +54,7 @@ RUN yum install -y vi tar initscripts \
     openssh-server
 
 COPY install_db2.sh /tmp/install_db2.sh
-RUN  /tmp/install_db2.sh
+RUN /tmp/install_db2.sh
 
 COPY docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

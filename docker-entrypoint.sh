@@ -31,17 +31,17 @@ else
 fi
 
 if [ -z "$LICENSE" ];then
-   echo ""
-   echo >&2 'error: LICENSE not set'
-   echo >&2 "Did you forget to add '-e LICENSE=accept' ?"
-   exit 1
+  echo ""
+  echo >&2 'error: LICENSE not set'
+  echo >&2 "Did you forget to add '-e LICENSE=accept' ?"
+  exit 1
 fi
 
 if [ "${LICENSE}" != "accept" ];then
-   echo ""
-   echo >&2 "error: LICENSE not set to 'accept'"
-   echo >&2 "Please set '-e LICENSE=accept' to accept License before use the DB2 software contained in this image."
-   exit 1
+  echo ""
+  echo >&2 "error: LICENSE not set to 'accept'"
+  echo >&2 "Please set '-e LICENSE=accept' to accept License before use the DB2 software contained in this image."
+  exit 1
 fi
 
 if [[ $1 = "-d" ]]; then
